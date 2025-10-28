@@ -3,6 +3,14 @@
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-red-600 mb-2">Subir Archivo</h1>
             <p class="text-gray-600">Selecciona un archivo</p>
+            <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-left">
+                <p class="text-sm text-gray-700 mb-1">
+                    <strong class="text-blue-600">ℹ️ Detección de duplicados:</strong>
+                </p>
+                <p class="text-xs text-gray-600">
+                    Se comparará la <strong>primera columna</strong> (ID principal) para identificar registros duplicados. Las filas duplicadas se marcarán en amarillo.
+                </p>
+            </div>
         </div>
 
         <form class="space-y-6">
@@ -22,9 +30,21 @@
             <!-- Área de previsualización -->
             <div id="preview-area" class="hidden">
                 <div class="border-2 border-red-300 rounded-lg p-4 bg-white">
-                    <h3 class="text-lg font-semibold text-red-600 mb-3">Vista Previa</h3>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-red-600">Vista Previa</h3>
+                        <div id="duplicate-badge" class="hidden">
+                            <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                ⚠️ Duplicados detectados
+                            </span>
+                        </div>
+                    </div>
                     <div id="table-container" class="overflow-x-auto max-h-96 overflow-y-auto">
                         <!-- La tabla se insertará aquí -->
+                    </div>
+                    <div id="duplicate-warning" class="hidden mt-3 p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
+                        <p class="text-sm text-yellow-800">
+                            <strong>⚠️ Advertencia:</strong> Se han detectado <span id="duplicate-count" class="font-bold">0</span> registro(s) duplicado(s). Las filas duplicadas están marcadas en amarillo.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -79,11 +99,47 @@
                                     }
                                 });
 
+                                // Detectar duplicados basados en la primera columna
+                                const firstColumnValues = {};
+                                const duplicateRowIndices = new Set();
+                                let duplicateCount = 0;
+
+                                // Obtener los valores de la primera columna (excluyendo encabezado)
+                                for (let i = 1; i < rows.length; i++) {
+                                    const firstCell = rows[i][0];
+
+                                    if (firstColumnValues[firstCell]) {
+                                        // Es duplicado
+                                        duplicateRowIndices.add(i);
+                                        duplicateRowIndices.add(firstColumnValues[firstCell]);
+                                        duplicateCount++;
+                                    } else {
+                                        firstColumnValues[firstCell] = i;
+                                    }
+                                }
+
+                                // Mostrar advertencia si hay duplicados
+                                const duplicateBadge = document.getElementById('duplicate-badge');
+                                const duplicateWarning = document.getElementById('duplicate-warning');
+                                const duplicateCountSpan = document.getElementById('duplicate-count');
+
+                                if (duplicateCount > 0) {
+                                    duplicateBadge.classList.remove('hidden');
+                                    duplicateWarning.classList.remove('hidden');
+                                    duplicateCountSpan.textContent = duplicateCount * 2; // Se multiplica por 2 porque cada duplicado tiene 2 filas (original + duplicado)
+                                } else {
+                                    duplicateBadge.classList.add('hidden');
+                                    duplicateWarning.classList.add('hidden');
+                                }
+
                                 // Crear tabla HTML
                                 let tableHTML = '<table class="min-w-full border-collapse border border-red-200">';
 
                                 rows.forEach((row, index) => {
-                                    tableHTML += '<tr>';
+                                    const isDuplicate = duplicateRowIndices.has(index);
+                                    const rowClass = isDuplicate ? 'bg-yellow-200' : (index % 2 === 0 ? 'bg-white' : 'bg-red-50');
+
+                                    tableHTML += `<tr class="${isDuplicate ? 'border-2 border-yellow-500' : ''}">`;
 
                                     row.forEach(cell => {
                                         if (index === 0) {
@@ -91,8 +147,11 @@
                                             tableHTML += `<th class="bg-red-600 text-white px-4 py-2 border border-red-500 text-left font-semibold">${cell || '&nbsp;'}</th>`;
                                         } else {
                                             // Datos
-                                            const bgClass = index % 2 === 0 ? 'bg-white' : 'bg-red-50';
-                                            tableHTML += `<td class="${bgClass} px-4 py-2 border border-red-200 text-gray-700">${cell || '&nbsp;'}</td>`;
+                                            if (isDuplicate) {
+                                                tableHTML += `<td class="bg-yellow-200 px-4 py-2 border border-yellow-400 text-gray-700 font-medium">${cell || '&nbsp;'}</td>`;
+                                            } else {
+                                                tableHTML += `<td class="${rowClass} px-4 py-2 border border-red-200 text-gray-700">${cell || '&nbsp;'}</td>`;
+                                            }
                                         }
                                     });
 
