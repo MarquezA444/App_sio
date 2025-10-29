@@ -1,59 +1,222 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🧠 Hackathon 2025 – Geo‑Visor de Spots (Laravel + React + Mapbox + FastAPI)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación web que permite cargar, validar, previsualizar por lote y enviar a la API de Sioma datos georreferenciados de palmas (spots). Incluye un validador híbrido (Python + PHP) y visualización profesional con Mapbox GL JS.
 
-## About Laravel
+## 🎯 Características
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- ✅ Carga de archivos `.csv`/`.xlsx`
+- ✅ Validación automática (coordenadas duplicadas, línea/posición por lote, lotes válidos, valores vacíos)
+- ✅ Resumen de errores/advertencias y descarga de archivo corregido
+- ✅ Mapa interactivo por lote con puntos, líneas de palma y perímetro aproximado
+- ✅ Envío de datos validados a la API de Sioma
+- ✅ Optimizada para archivos grandes (clustering, límites progresivos y líneas segmentadas)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🛠 Tecnologías utilizadas
 
-## Learning Laravel
+### Backend (PHP)
+- Laravel 12 (Framework)
+- Inertia.js (Bridge SPA)
+- Guzzle (Cliente HTTP)
+- Maatwebsite/Excel (Importación CSV/XLSX)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Frontend (JS)
+- React 18
+- Vite (Dev server y build)
+- Tailwind CSS
+- Axios (HTTP)
+- Mapbox GL JS + react-map-gl (Mapa satelital 3D y capas vectoriales)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Validador (Python)
+- FastAPI (Microservicio)
+- Pandas (Procesamiento de datos)
+- OpenPyXL (Lectura XLSX)
 
-## Laravel Sponsors
+### Infraestructura / Otros
+- Docker y Docker Compose (opcional para el validador)
+- SQLite por defecto (puedes cambiar a MySQL/PostgreSQL)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 📦 Requisitos
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- PHP 8.2+
+- Composer
+- Node.js 18+ y npm
+- Python 3.11+ (si usas el validador local sin Docker)
+- Docker Desktop (opcional, recomendado para el validador)
+- Token de Mapbox (gratuito)
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Instalación y configuración
 
-## Code of Conduct
+1) Clonar e instalar dependencias
+```bash
+git clone <url-del-repositorio>
+cd siomav_1
+composer install
+npm install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+2) Variables de entorno
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+Editar `.env` (valores de ejemplo):
+```env
+APP_URL=http://localhost
 
-## Security Vulnerabilities
+SIOMA_API_BASE=https://api.sioma.dev
+SIOMA_API_TOKEN=tu_token_sioma
+SIOMA_API_TIMEOUT=30
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Dirección del microservicio Python (FastAPI)
+PYTHON_VALIDATOR_URL=http://localhost:8001
+PYTHON_VALIDATOR_TIMEOUT=120
 
-## License
+# Token de Mapbox (obligatorio para el mapa)
+VITE_MAPBOX_TOKEN=pk.tu_token_publico
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+3) Base de datos y migraciones
+```bash
+php artisan migrate
+```
+
+4) Validador Python (elige una opción)
+
+- Opción A: Docker Compose (recomendado)
+```bash
+docker-compose up -d python-validator
+# Verifica salud
+curl http://localhost:8001/health
+```
+
+- Opción B: Local (sin Docker)
+```bash
+cd python-validator
+python -m venv venv
+venv\Scripts\activate   # Windows
+# source venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8001
+```
+
+5) Token de Mapbox
+
+- Crea una cuenta y token público en `https://account.mapbox.com`
+- Colócalo en `VITE_MAPBOX_TOKEN` del `.env`
+
+6) Ejecutar en desarrollo
+
+En dos terminales:
+```bash
+# Terminal 1 – API Laravel
+php artisan serve
+
+# Terminal 2 – Frontend Vite
+npm run dev
+```
+App: `http://localhost:8000`
+
+7) Build de producción (opcional)
+```bash
+npm run build
+```
+
+---
+
+## 🧭 Flujo de uso
+
+1. Selecciona la finca (lista desde API Sioma) y el lote (por finca).
+2. Sube un archivo `.csv` o `.xlsx` con columnas base:
+   ```
+   Latitud, Longitud, Línea palma, Posición palma, Lote
+   ```
+3. Presiona “Validar datos”. El sistema usa el validador Python (si está disponible) o PHP si no.
+4. Revisa el resumen de errores/advertencias. Descarga opcionalmente el archivo corregido.
+5. Previsualiza el lote en el mapa (puntos, líneas, perímetro). Cambia de lote para evitar cargar toda la finca.
+6. Envía los datos validados a la API de Sioma.
+
+---
+
+## 🧪 Validaciones implementadas
+
+- ❌ Coordenadas duplicadas (latitud/longitud)
+- ❌ En un mismo lote no se repiten líneas
+- ❌ En una línea no se repiten posiciones
+- ❌ Lotes válidos según la finca seleccionada
+- ⚠️ Valores vacíos o en blanco
+- Resumen total de errores/advertencias y detalle por filas
+
+Archivo corregido: se filtran duplicados, opcionalmente se eliminan filas vacías (confirmación en UI) y se generan columnas `Estado` y `Errores`.
+
+---
+
+## 🗺 Visualización (Mapbox GL JS)
+
+- Estilo satélite con cámara animada
+- Terreno 3D (habilitado para datasets medianos)
+- Clustering de puntos a bajos niveles de zoom
+- Puntos individuales con etiquetas de posición
+- Líneas de palma por lote (ordenadas por posición y segmentadas por distancia)
+- Perímetro aproximado por lote (bounding box)
+- Optimizaciones anti‑bloqueo para archivos grandes
+
+El token se inyecta desde `VITE_MAPBOX_TOKEN` y se usa en `resources/js/Components/MapboxMap.jsx`.
+
+---
+
+## 🔌 Endpoints internos
+
+Backend Laravel expone (prefijo principal puede variar según rutas):
+
+- `GET /api/sioma/fincas`
+- `GET /api/sioma/lotes?finca_id=...`
+- `POST /api/v1/map/upload-spots` (subida + validación)
+- `POST /api/v1/map/send-to-sioma` (envío a Sioma)
+- `POST /api/v1/map/download-corrected` (descarga CSV corregido)
+
+Cliente Sioma: `app/Services/ApiSiomaClient.php`
+Validación PHP: `app/Services/SpotValidationService.php`
+Validador Python: `python-validator/app/main.py` y `python-validator/app/validators.py`
+
+---
+
+## 🗂 Estructura relevante
+
+```
+resources/js/
+├── Pages/Dashboard.jsx          # UI principal (carga/validación/mapa)
+└── Components/MapboxMap.jsx     # Mapa (Mapbox GL JS)
+
+app/Http/Controllers/
+├── MapController.php            # Flujo de mapa, descarga corregido y envío
+├── SpotController.php           # Flujo de upload/validación clásico
+└── SiomaController.php          # Proxy a API Sioma (fincas/lotes)
+
+app/Services/
+├── ApiSiomaClient.php           # Cliente HTTP Sioma
+└── SpotValidationService.php    # Validador PHP (fallback)
+
+python-validator/
+└── app/{main.py, validators.py} # FastAPI + Pandas
+```
+
+---
+
+## 🧰 Troubleshooting
+
+- “Style is not done loading” en Mapbox: el componente espera a que cargue el estilo antes de agregar capas.
+- “Out of Memory”: selecciona un lote; el mapa limita spots y líneas progresivamente.
+- 500 al descargar corregidos: usa `/api/v1/map/download-corrected` (implementado en `MapController`).
+- Token de Mapbox inválido: revisa `VITE_MAPBOX_TOKEN` y reinicia `npm run dev`.
+
+---
+
+## 📄 Licencia
+
+MIT License
